@@ -21,5 +21,7 @@ private:
 private slots:
     void Get_source_explorer();
     void Get_dest_explorer();
+    void Button_start_backup_pressed();
+    void Button_view_backups_pressed();
 };
 #endif // MAINWINDOW_H

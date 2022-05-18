@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
-    <height>300</height>
+    <width>554</width>
+    <height>360</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -158,6 +158,20 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QPushButton" name="Button_start">
+      <property name="text">
+       <string>Start backup</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="Button_view_active">
+      <property name="text">
+       <string>View active backups</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -165,7 +179,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>550</width>
+     <width>554</width>
      <height>21</height>
     </rect>
    </property>
