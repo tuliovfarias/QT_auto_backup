@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>554</width>
-    <height>360</height>
+    <height>387</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -169,6 +169,16 @@
      <widget class="QPushButton" name="Button_view_active">
       <property name="text">
        <string>View active backups</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="footer">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
