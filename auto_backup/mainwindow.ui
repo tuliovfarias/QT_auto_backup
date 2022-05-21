@@ -173,6 +173,13 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="Button_clear">
+      <property name="text">
+       <string>Clear lists</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QLabel" name="footer">
       <property name="text">
        <string/>

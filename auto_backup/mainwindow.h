@@ -23,5 +23,7 @@ private slots:
     void Get_dest_explorer();
     void Button_start_backup_pressed();
     void Button_view_backups_pressed();
+    void Dest_path_selected();
+    void Button_clear_pressed();
 };
 #endif // MAINWINDOW_H
