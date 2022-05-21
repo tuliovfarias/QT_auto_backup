@@ -101,18 +101,10 @@ void MainWindow::Button_start_backup_pressed(){
     QJsonDocument json_doc = read_json(backups_path);
     QJsonObject json_obj = json_doc.object();
 
-    /*foreach(const QString& key, json_obj.keys()) {
-        QJsonValue value = json_obj.value(key);
-        qDebug() << "Key= " << key << ", Value= " << value.toArray();
-    }*/
-
     if (ui->list_dest->count() && ui->list_source->count()) {
-      QMap<QString, QList<QString>> map;
       for (int i = 0; i < ui->list_dest->count(); ++i) {
         QString path_dest = ui->list_dest->item(i)->text();
         QJsonArray source_array = json_obj.value(path_dest).toArray();
-        //qDebug() << source_array;
-        //if(source_array.isEmpty()){ //if it is a new destination
         for (int i = 0; i < ui->list_source->count(); ++i) {
           QString path_source = ui->list_source->item(i)->text();
           if(!search_string_in_json_array(source_array, path_source)){
