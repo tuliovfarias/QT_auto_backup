@@ -9,6 +9,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QSet>
+#include <QDesktopServices>
 
 
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
@@ -142,6 +143,11 @@ void MainWindow::Button_start_backup_pressed(){
 void MainWindow::Button_view_backups_pressed(){
     QString backups_path = default_path+QDir::separator()+"backups.txt";
     QFile file(backups_path);
-    QJsonDocument document = read_json(backups_path);
-    qDebug() << document;
+    QJsonDocument json_doc = read_json(backups_path);
+    QJsonObject json_obj = json_doc.object();
+    foreach(const QString& key, json_obj.keys()) {
+        QJsonValue value = json_obj.value(key);
+        qDebug() << "Destination: " << key << " => To backup: " << value.toArray();
+    }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path));
 }
