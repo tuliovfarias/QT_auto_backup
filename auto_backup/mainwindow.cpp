@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QSet>
 
 
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
@@ -84,16 +85,26 @@ QJsonDocument read_json(QFile file){
     return document;
 }
 
+bool search_string_in_json_array(QJsonArray &array, QString str){
+    for (const auto json_str : array){
+      if(json_str == str){
+          return true;
+      }
+    }
+    return false;
+}
+
 void MainWindow::Button_start_backup_pressed(){
     QString backups_path = default_path+QDir::separator()+"backups.txt";
     QFile file(backups_path);
     QJsonDocument json_doc = read_json(backups_path);
     QJsonObject json_obj = json_doc.object();
 
-    foreach(const QString& key, json_obj.keys()) {
+    /*foreach(const QString& key, json_obj.keys()) {
         QJsonValue value = json_obj.value(key);
         qDebug() << "Key= " << key << ", Value= " << value.toArray();
-    }
+    }*/
+
     if (ui->list_dest->count() && ui->list_source->count()) {
       QMap<QString, QList<QString>> map;
       for (int i = 0; i < ui->list_dest->count(); ++i) {
@@ -103,7 +114,9 @@ void MainWindow::Button_start_backup_pressed(){
         //if(source_array.isEmpty()){ //if it is a new destination
         for (int i = 0; i < ui->list_source->count(); ++i) {
           QString path_source = ui->list_source->item(i)->text();
-          source_array.push_back(path_source);
+          if(!search_string_in_json_array(source_array, path_source)){
+            source_array.push_back(path_source);
+          }
         }
         json_obj[path_dest] = source_array;
       }
@@ -116,6 +129,8 @@ void MainWindow::Button_start_backup_pressed(){
         stream << bytes << Qt::endl;
         file.close();
         ui->footer->setText("Backup registered!");
+        ui->list_dest->clear();
+        ui->list_source->clear();
       } else {
         ui->footer->setText("File open failed: " + backups_path);
       }
