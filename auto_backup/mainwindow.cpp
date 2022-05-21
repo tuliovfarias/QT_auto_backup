@@ -140,6 +140,16 @@ void MainWindow::Button_start_backup_pressed(){
     }
 }
 
+template <typename Container>
+QString join_as_string(Container const& array, const QString separator = ", "){
+    QString str = "";
+    foreach(const auto& e, array) {
+        str = str + separator + e.toString();
+    }
+    str.erase(str.begin(),str.begin()+separator.size()); // remove the first "separator"
+    return str;
+}
+
 void MainWindow::Button_view_backups_pressed(){
     QString backups_path = default_path+QDir::separator()+"backups.txt";
     QFile file(backups_path);
@@ -147,7 +157,7 @@ void MainWindow::Button_view_backups_pressed(){
     QJsonObject json_obj = json_doc.object();
     foreach(const QString& key, json_obj.keys()) {
         QJsonValue value = json_obj.value(key);
-        qDebug() << "Destination: " << key << " => To backup: " << value.toArray();
+        qDebug() << "Destination: " << key << " => To backup: " << join_as_string(value.toArray());
     }
     QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path));
 }
