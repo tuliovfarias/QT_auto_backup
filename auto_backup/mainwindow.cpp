@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "dragdropfilter.h"
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
 #include <filesystem>
@@ -10,6 +11,8 @@
 #include <QJsonArray>
 #include <QSet>
 #include <QDesktopServices>
+#include <QMimeData>
+#include <QDragEnterEvent>
 
 
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
@@ -21,8 +24,19 @@ MainWindow::MainWindow(QWidget *parent)
 {   
 
     ui->setupUi(this);
+
     if (!QDir(default_path).exists())
         QDir(default_path).mkpath(".");
+
+    auto dragDropSource = new DragDropFilter;
+    auto dragDropDest = new DragDropFilter;
+    ui->list_source->installEventFilter(dragDropSource);
+    ui->list_dest->installEventFilter(dragDropDest);
+    ui->list_source->setAcceptDrops(true);
+    ui->list_dest->setAcceptDrops(true);
+
+    connect(dragDropSource, &DragDropFilter::dragDropped, this, [this](const QMimeData* mimeData){add_files_source(mimeData);});
+    connect(dragDropDest, &DragDropFilter::dragDropped, this, [this](const QMimeData* mimeData){add_files_dest(mimeData);});
 
     connect(ui->Button_source_files, SIGNAL(released()), this, SLOT(Get_source_explorer()));
     connect(ui->Button_source_folder, SIGNAL(released()), this, SLOT(Get_source_explorer()));
@@ -38,6 +52,44 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::add_files_source(const QMimeData* mimeData){
+    foreach (const QUrl &url, mimeData->urls()) {
+        QString fileName = url.toLocalFile();
+        ui->list_source->addItem(fileName);
+    }
+}
+
+void MainWindow::add_files_dest(const QMimeData* mimeData){
+    foreach (const QUrl &url, mimeData->urls()) {
+        QString fileName = url.toLocalFile();
+        ui->list_dest->addItem(fileName);
+    }
+}
+
+/*
+void MainWindow::dragEnterEvent(QDragEnterEvent *event){
+    qDebug() << "drag" << event;
+    if (event->mimeData()->hasText()) {
+        if (event->source() == this) {
+            event->setDropAction(Qt::MoveAction);
+            event->accept();
+        } else {
+            event->acceptProposedAction();
+        }
+    } else {
+        event->ignore();
+    }
+}
+*/
+
+/*
+void MainWindow::dropEvent(QDropEvent *e){
+    foreach (const QUrl &url, e->mimeData()->urls()) {
+        QString fileName = url.toLocalFile();
+        ui->listWidget->addItem(fileName);
+    }
+}
+*/
 void MainWindow::Get_source_explorer(){
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     QString buttonText = button->text();
@@ -145,7 +197,8 @@ QString join_as_string(Container const& array, const QString separator = ", "){
     return str;
 }
 
-void MainWindow::Button_view_backups_pressed(){    
+void MainWindow::Button_view_backups_pressed(){
+    MainWindow::Button_clear_pressed();
     QFile file(backups_path);
     QJsonDocument json_doc = read_json(backups_path);
     if(!json_doc.isEmpty()){

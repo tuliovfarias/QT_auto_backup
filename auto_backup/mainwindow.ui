@@ -123,6 +123,9 @@
       </property>
       <item>
        <widget class="QListWidget" name="list_source">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -131,6 +134,9 @@
         </property>
         <property name="sizeAdjustPolicy">
          <enum>QAbstractScrollArea::AdjustIgnored</enum>
+        </property>
+        <property name="dragEnabled">
+         <bool>true</bool>
         </property>
         <property name="resizeMode">
          <enum>QListView::Adjust</enum>

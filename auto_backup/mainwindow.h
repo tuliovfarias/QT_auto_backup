@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "qmimedata.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -18,6 +19,10 @@ public:
 private:
     Ui::MainWindow *ui;
 
+//protected:
+    //void dragEnterEvent(QDragEnterEvent *event);
+    //void dropEvent(QDropEvent *e);
+
 private slots:
     void Get_source_explorer();
     void Get_dest_explorer();
@@ -25,5 +30,7 @@ private slots:
     void Button_view_backups_pressed();
     void Dest_path_selected();
     void Button_clear_pressed();
+    void add_files_source(const QMimeData* mimeData);
+    void add_files_dest(const QMimeData* mimeData);
 };
 #endif // MAINWINDOW_H
