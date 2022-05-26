@@ -15,9 +15,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void set_DarkMode(bool on);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *ui;    
 
 //protected:
     //void dragEnterEvent(QDragEnterEvent *event);
@@ -32,5 +33,6 @@ private slots:
     void Button_clear_pressed();
     void add_files_source(const QMimeData* mimeData);
     void add_files_dest(const QMimeData* mimeData);
+    void change_DarkMode();
 };
 #endif // MAINWINDOW_H

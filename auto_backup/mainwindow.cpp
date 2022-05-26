@@ -4,7 +4,6 @@
 #include <QFileDialog>
 #include <filesystem>
 #include <iostream>
-#include <map>
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -45,11 +44,36 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->Button_view_active, SIGNAL(released()), this, SLOT(Button_view_backups_pressed()));
     connect(ui->Button_clear, SIGNAL(released()), this, SLOT(Button_clear_pressed()));
     connect(ui->list_dest, SIGNAL(itemSelectionChanged()), this, SLOT(Dest_path_selected()));
+    connect(ui->MenuDarkmode, SIGNAL(triggered()), this, SLOT(change_DarkMode()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::set_DarkMode(bool on){
+    QFile styleSheetFile;
+    if(on == true){
+        styleSheetFile.setFileName("ThemeDarkMode.qss");
+    }
+    else {
+        styleSheetFile.setFileName("ThemeClassic.qss");
+    }
+    styleSheetFile.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(styleSheetFile.readAll());
+    setStyleSheet(styleSheet);
+}
+
+void MainWindow::change_DarkMode(){
+    if(ui->MenuDarkmode->isChecked()){
+        qDebug() << "MenuDarkmode is now checked";
+        set_DarkMode(true);
+    }
+    else{
+        qDebug() << "MenuDarkmode is now unchecked";
+        set_DarkMode(false);
+    }
 }
 
 void MainWindow::add_files_source(const QMimeData* mimeData){
@@ -210,6 +234,7 @@ void MainWindow::Button_view_backups_pressed(){
         }
         ui->list_dest->setCurrentRow(0);
         //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path)); //open json file
+        ui->footer->setText("Choose the destination to see the backups");
     }
     else{
         ui->footer->setText("No bakups registered!");
@@ -226,7 +251,7 @@ void MainWindow::Dest_path_selected(){
     for (const auto json_str : json_array){
         ui->list_source->addItem(json_str.toString());
     }
-    ui->footer->setText(selected_item_dest);
+    //ui->footer->setText(selected_item_dest);
 }
 
 void MainWindow::Button_clear_pressed(){
