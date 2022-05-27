@@ -14,6 +14,7 @@
 #include <QDragEnterEvent>
 
 
+
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
 QString backups_path = default_path+QDir::separator()+"backups.json";
 
@@ -23,6 +24,14 @@ MainWindow::MainWindow(QWidget *parent)
 {   
 
     ui->setupUi(this);
+    Button_remove_source = new QPushButton("Remove", this);
+    Button_remove_dest = new QPushButton("Remove", this);
+    horizontalLayout_r = new QHBoxLayout();
+    horizontalLayout_r->setObjectName(QString::fromUtf8("horizontalLayout_r"));
+    horizontalLayout_r->setSizeConstraint(QLayout::SetFixedSize);
+    horizontalLayout_r->addWidget(Button_remove_source);
+    horizontalLayout_r->addWidget(Button_remove_dest);
+    ui->verticalLayout->insertLayout(3,horizontalLayout_r);
 
     if (!QDir(default_path).exists())
         QDir(default_path).mkpath(".");
@@ -45,6 +54,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->Button_clear, SIGNAL(released()), this, SLOT(Button_clear_pressed()));
     connect(ui->list_dest, SIGNAL(itemSelectionChanged()), this, SLOT(Dest_path_selected()));
     connect(ui->MenuDarkmode, SIGNAL(triggered()), this, SLOT(change_DarkMode()));
+
+    connect(Button_remove_source, SIGNAL(released()), this, SLOT(remove_from_source()));
+    connect(Button_remove_dest, SIGNAL(released()), this, SLOT(remove_from_dest()));
 }
 
 MainWindow::~MainWindow()
@@ -220,6 +232,14 @@ QString join_as_string(Container const& array, const QString separator = ", "){
     return str;
 }
 
+void MainWindow::showRemoveButton(){
+     horizontalLayout_r->insertWidget(1, Button_remove_source);
+     horizontalLayout_r->insertWidget(1, Button_remove_dest);
+     Button_remove_source->setVisible(true);
+     Button_remove_dest->setVisible(true);
+
+}
+
 void MainWindow::Button_view_backups_pressed(){
     MainWindow::Button_clear_pressed();
     QFile file(backups_path);
@@ -233,22 +253,26 @@ void MainWindow::Button_view_backups_pressed(){
         }
         ui->list_dest->setCurrentRow(0);
         //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path)); //open json file
-        ui->footer->setText("Choose the destination to see the backups");
+        ui->footer->setText("Choose the destination to see the files/folders to backup");
+        showRemoveButton();
     }
     else{
         ui->footer->setText("No bakups registered!");
     }
 }
 
-void MainWindow::Dest_path_selected(){
-    QString selected_item_dest = ui->list_dest->currentItem()->text();
-    QFile file(backups_path);
-    QJsonDocument json_doc = read_json(backups_path);
-    QJsonObject json_obj = json_doc.object();
-    QJsonArray json_array = json_obj[selected_item_dest].toArray();
-    ui->list_source->clear();
-    for (const auto json_str : json_array){
-        ui->list_source->addItem(json_str.toString());
+void MainWindow::Dest_path_selected(){    
+    if(ui->list_dest->count() != 1){
+        qDebug() << "dest changed";
+        QString selected_item_dest = ui->list_dest->currentItem()->text();
+        QFile file(backups_path);
+        QJsonDocument json_doc = read_json(backups_path);
+        QJsonObject json_obj = json_doc.object();
+        QJsonArray json_array = json_obj[selected_item_dest].toArray();
+        ui->list_source->clear();
+        for (const auto json_str : json_array){
+            ui->list_source->addItem(json_str.toString());
+        }
     }
     //ui->footer->setText(selected_item_dest);
 }
@@ -257,4 +281,22 @@ void MainWindow::Button_clear_pressed(){
     ui->list_dest->clear();
     ui->list_source->clear();
     ui->footer->clear();
+    Button_remove_source->setVisible(false);
+    Button_remove_dest->setVisible(false);
+}
+
+void MainWindow::remove_from_source(){
+    if (ui->list_source->currentItem() != 0 & ui->list_source->count() != 0){
+        QListWidgetItem *selected_item_source = ui->list_source->takeItem(ui->list_source->currentRow());
+        ui->footer->setText(selected_item_source->text()+" removed");
+        ui->list_source->setCurrentRow(0);
+    }
+}
+
+void MainWindow::remove_from_dest(){
+    if(ui->list_dest->count() != 0){
+        QListWidgetItem *selected_item_dest = ui->list_dest->takeItem(ui->list_dest->currentRow());
+        ui->footer->setText(selected_item_dest->text()+" removed");
+        ui->list_dest->setCurrentRow(0);
+    }
 }

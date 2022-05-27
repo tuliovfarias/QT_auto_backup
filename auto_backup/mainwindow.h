@@ -1,7 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "qboxlayout.h"
 #include "qmimedata.h"
+#include "qpushbutton.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -18,7 +20,11 @@ public:
     void set_DarkMode(bool on);
 
 private:
-    Ui::MainWindow *ui;    
+    Ui::MainWindow *ui;
+    QPushButton *Button_remove_source;
+    QPushButton *Button_remove_dest;
+    QHBoxLayout *horizontalLayout_r;
+    void showRemoveButton();
 
 //protected:
     //void dragEnterEvent(QDragEnterEvent *event);
@@ -34,5 +40,7 @@ private slots:
     void add_files_source(const QMimeData* mimeData);
     void add_files_dest(const QMimeData* mimeData);
     void change_DarkMode();
+    void remove_from_source();
+    void remove_from_dest();
 };
 #endif // MAINWINDOW_H
