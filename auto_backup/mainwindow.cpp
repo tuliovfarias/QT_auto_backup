@@ -15,7 +15,7 @@
 
 
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
-QString backups_path = default_path+QDir::separator()+"backups.txt";
+QString backups_path = default_path+QDir::separator()+"backups.json";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -175,7 +175,6 @@ bool search_string_in_json_array(QJsonArray &array, QString str){
 }
 
 void MainWindow::Button_start_backup_pressed(){
-    QString backups_path = default_path+QDir::separator()+"backups.txt";
     QFile file(backups_path);
     QJsonDocument json_doc = read_json(backups_path);
     QJsonObject json_obj = json_doc.object();
