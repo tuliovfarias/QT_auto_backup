@@ -21,7 +21,7 @@ QString icons_path = "./icons";
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-{   
+{
 
     ui->setupUi(this);
 
@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     config_remove_buttom();
     config_icons();
+    Button_view_backups_pressed();
+    Dest_path_selected();
 
     auto dragDropSource = new DragDropFilter;
     auto dragDropDest = new DragDropFilter;
@@ -63,6 +65,8 @@ void MainWindow::config_remove_buttom(){
     Button_remove_source = new QPushButton(this);
     //Button_remove_source = new QPushButton("Remove", this);
     Button_remove_dest = new QPushButton(this);
+    Button_remove_source->setVisible(false);
+    Button_remove_dest->setVisible(false);
     //Button_remove_dest = new QPushButton("Remove", this);
     horizontalLayout_r = new QHBoxLayout();
     horizontalLayout_r->setObjectName(QString::fromUtf8("horizontalLayout_r"));
@@ -121,16 +125,22 @@ void MainWindow::change_DarkMode(){
 }
 
 void MainWindow::add_files_source(const QMimeData* mimeData){
-    foreach (const QUrl &url, mimeData->urls()) {
-        QString fileName = url.toLocalFile();
-        ui->list_source->addItem(fileName);
+    if(!mimeData->urls().empty()){
+        foreach (const QUrl &url, mimeData->urls()) {
+            QString fileName = url.toLocalFile();
+            ui->list_source->addItem(fileName);
+        }
+        showRemoveButtonSource();
     }
 }
 
 void MainWindow::add_files_dest(const QMimeData* mimeData){
-    foreach (const QUrl &url, mimeData->urls()) {
-        QString fileName = url.toLocalFile();
-        ui->list_dest->addItem(fileName);
+    if(!mimeData->urls().empty()){
+        foreach (const QUrl &url, mimeData->urls()) {
+            QString fileName = url.toLocalFile();
+            ui->list_dest->addItem(fileName);
+        }
+        showRemoveButtonDest();
     }
 }
 
@@ -167,6 +177,7 @@ void MainWindow::Get_source_explorer(){
           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
       if(!source_folder.isEmpty()){
         ui->list_source->addItem(source_folder);
+        showRemoveButtonSource();
       }
     }
     else if(button->objectName() == "Button_source_files"){
@@ -175,6 +186,7 @@ void MainWindow::Get_source_explorer(){
       if(!source_files.isEmpty()){
           for (const auto &file : source_files) {
             ui->list_source->addItem(file);
+            showRemoveButtonSource();
           }
       }
     }
@@ -189,6 +201,7 @@ void MainWindow::Get_dest_explorer(){
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if(!dest_folder.isEmpty()){
         ui->list_dest->addItem(dest_folder);
+        showRemoveButtonDest();
     }
 }
 
@@ -265,11 +278,18 @@ QString join_as_string(Container const& array, const QString separator = ", "){
 }
 
 void MainWindow::showRemoveButton(){
-     horizontalLayout_r->insertWidget(1, Button_remove_source);
-     horizontalLayout_r->insertWidget(1, Button_remove_dest);
-     Button_remove_source->setVisible(true);
-     Button_remove_dest->setVisible(true);
+     showRemoveButtonSource();
+     showRemoveButtonDest();
+}
 
+void MainWindow::showRemoveButtonSource(){
+    horizontalLayout_r->insertWidget(1, Button_remove_source);
+    Button_remove_source->setVisible(true);
+}
+
+void MainWindow::showRemoveButtonDest(){
+    horizontalLayout_r->insertWidget(1, Button_remove_dest);
+    Button_remove_dest->setVisible(true);
 }
 
 void MainWindow::Button_view_backups_pressed(){
@@ -293,7 +313,7 @@ void MainWindow::Button_view_backups_pressed(){
     }
 }
 
-void MainWindow::Dest_path_selected(){    
+void MainWindow::Dest_path_selected(){
     if(ui->list_dest->count() != 1){
         qDebug() << "dest changed";
         QString selected_item_dest = ui->list_dest->currentItem()->text();
@@ -305,6 +325,9 @@ void MainWindow::Dest_path_selected(){
         for (const auto json_str : json_array){
             ui->list_source->addItem(json_str.toString());
         }
+        Button_remove_source->setVisible(true);
+        //showRemoveButtonSource();
+
     }
     //ui->footer->setText(selected_item_dest);
 }
@@ -322,6 +345,9 @@ void MainWindow::remove_from_source(){
         QListWidgetItem *selected_item_source = ui->list_source->takeItem(ui->list_source->currentRow());
         ui->footer->setText(selected_item_source->text()+" removed");
         ui->list_source->setCurrentRow(0);
+        if (ui->list_source->count() == 0){
+            Button_remove_source->setVisible(false);
+        }
     }
 }
 
@@ -330,5 +356,8 @@ void MainWindow::remove_from_dest(){
         QListWidgetItem *selected_item_dest = ui->list_dest->takeItem(ui->list_dest->currentRow());
         ui->footer->setText(selected_item_dest->text()+" removed");
         ui->list_dest->setCurrentRow(0);
+        if (ui->list_dest->count() == 0){
+            Button_remove_dest->setVisible(false);
+        }
     }
 }

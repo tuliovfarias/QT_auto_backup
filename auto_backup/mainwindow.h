@@ -27,6 +27,8 @@ private:
     void config_remove_buttom();
     void config_icons();
     void showRemoveButton();
+    void showRemoveButtonSource();
+    void showRemoveButtonDest();
 
 //protected:
     //void dragEnterEvent(QDragEnterEvent *event);
