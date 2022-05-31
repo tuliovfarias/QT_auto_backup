@@ -13,10 +13,10 @@
 #include <QMimeData>
 #include <QDragEnterEvent>
 
-
-
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
 QString backups_path = default_path+QDir::separator()+"backups.json";
+QString themes_path = "./themes";
+QString icons_path = "./icons";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,17 +24,12 @@ MainWindow::MainWindow(QWidget *parent)
 {   
 
     ui->setupUi(this);
-    Button_remove_source = new QPushButton("Remove", this);
-    Button_remove_dest = new QPushButton("Remove", this);
-    horizontalLayout_r = new QHBoxLayout();
-    horizontalLayout_r->setObjectName(QString::fromUtf8("horizontalLayout_r"));
-    horizontalLayout_r->setSizeConstraint(QLayout::SetFixedSize);
-    horizontalLayout_r->addWidget(Button_remove_source);
-    horizontalLayout_r->addWidget(Button_remove_dest);
-    ui->verticalLayout->insertLayout(3,horizontalLayout_r);
 
     if (!QDir(default_path).exists())
         QDir(default_path).mkpath(".");
+
+    config_remove_buttom();
+    config_icons();
 
     auto dragDropSource = new DragDropFilter;
     auto dragDropDest = new DragDropFilter;
@@ -64,13 +59,50 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::config_remove_buttom(){
+    Button_remove_source = new QPushButton(this);
+    //Button_remove_source = new QPushButton("Remove", this);
+    Button_remove_dest = new QPushButton(this);
+    //Button_remove_dest = new QPushButton("Remove", this);
+    horizontalLayout_r = new QHBoxLayout();
+    horizontalLayout_r->setObjectName(QString::fromUtf8("horizontalLayout_r"));
+    horizontalLayout_r->setSizeConstraint(QLayout::SetFixedSize);
+    horizontalLayout_r->addWidget(Button_remove_source);
+    horizontalLayout_r->addWidget(Button_remove_dest);
+    ui->verticalLayout->insertLayout(3,horizontalLayout_r);
+}
+
+void MainWindow::config_icons(){
+    QPixmap AddFile(icons_path + QDir::separator() + "add_file");
+    QIcon IconAddFile(AddFile);
+
+    QPixmap AddFolder(icons_path + QDir::separator() + "add_folder");
+    QIcon IconAddFolder(AddFolder);
+
+    QPixmap Remove(icons_path + QDir::separator() + "remove");
+    QIcon IconRemove(Remove);
+
+    ui->Button_source_folder->setIcon(IconAddFolder);
+    ui->Button_source_files->setIcon(IconAddFile);
+    ui->Button_dest->setIcon(IconAddFolder);
+
+    ui->Button_source_folder->setIconSize(QSize(30, 30));
+    ui->Button_source_files->setIconSize(QSize(30, 30));
+    ui->Button_dest->setIconSize(QSize(30, 30));
+
+    Button_remove_source->setIcon(Remove);
+    Button_remove_source->setIconSize(QSize(20, 20));
+    Button_remove_dest->setIcon(Remove);
+    Button_remove_dest->setIconSize(QSize(20, 20));
+}
+
 void MainWindow::set_DarkMode(bool on){
     QFile styleSheetFile;
     if(on == true){
-        styleSheetFile.setFileName("ThemeDarkMode.qss");
+        styleSheetFile.setFileName(themes_path + QDir::separator() + "ThemeDarkMode.qss");
     }
     else {
-        styleSheetFile.setFileName("ThemeClassic.qss");
+        styleSheetFile.setFileName(themes_path + QDir::separator() + "ThemeClassic.qss");
     }
     styleSheetFile.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(styleSheetFile.readAll());

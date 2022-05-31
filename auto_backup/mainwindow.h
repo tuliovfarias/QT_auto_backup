@@ -24,6 +24,8 @@ private:
     QPushButton *Button_remove_source;
     QPushButton *Button_remove_dest;
     QHBoxLayout *horizontalLayout_r;
+    void config_remove_buttom();
+    void config_icons();
     void showRemoveButton();
 
 //protected:
