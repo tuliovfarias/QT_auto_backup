@@ -44,7 +44,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Include file(s)/folder(s) to backup</string>
+         <string>File(s)/folder(s) to backup</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -60,7 +60,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Include destination folder(s)</string>
+         <string>Destination folder(s)</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

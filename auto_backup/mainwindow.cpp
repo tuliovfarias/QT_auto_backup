@@ -115,11 +115,11 @@ void MainWindow::set_DarkMode(bool on){
 
 void MainWindow::change_DarkMode(){
     if(ui->MenuDarkmode->isChecked()){
-        qDebug() << "MenuDarkmode is now checked";
+        //qDebug() << "MenuDarkmode is now checked";
         set_DarkMode(true);
     }
     else{
-        qDebug() << "MenuDarkmode is now unchecked";
+        //qDebug() << "MenuDarkmode is now unchecked";
         set_DarkMode(false);
     }
 }
@@ -315,7 +315,6 @@ void MainWindow::Button_view_backups_pressed(){
 
 void MainWindow::Dest_path_selected(){
     if(ui->list_dest->count() != 1){
-        qDebug() << "dest changed";
         QString selected_item_dest = ui->list_dest->currentItem()->text();
         QFile file(backups_path);
         QJsonDocument json_doc = read_json(backups_path);
