@@ -13,6 +13,7 @@
 #include <QMimeData>
 #include <QDragEnterEvent>
 #include <QMessageBox>
+#include <QtAlgorithms>
 
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
 QString backups_path = default_path+QDir::separator()+"backups.json";
@@ -25,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 
     ui->setupUi(this);
+    ui->list_source->setSelectionMode(QListView::ExtendedSelection);
 
     if (!QDir(default_path).exists())
         QDir(default_path).mkpath(".");
@@ -68,13 +70,8 @@ void MainWindow::config_remove_buttom(){
     Button_remove_dest = new QPushButton(this);
     Button_remove_source->setVisible(false);
     Button_remove_dest->setVisible(false);
-    //Button_remove_dest = new QPushButton("Remove", this);
-    horizontalLayout_r = new QHBoxLayout();
-    horizontalLayout_r->setObjectName(QString::fromUtf8("horizontalLayout_r"));
-    horizontalLayout_r->setSizeConstraint(QLayout::SetFixedSize);
-    horizontalLayout_r->addWidget(Button_remove_source);
-    horizontalLayout_r->addWidget(Button_remove_dest);
-    ui->verticalLayout->insertLayout(3,horizontalLayout_r);
+    ui->verticalLayout->insertWidget(3,Button_remove_source);
+    ui->verticalLayout_2->insertWidget(3,Button_remove_dest);
 }
 
 void MainWindow::config_icons(){
@@ -318,12 +315,12 @@ void MainWindow::showRemoveButton(){
 }
 
 void MainWindow::showRemoveButtonSource(){
-    horizontalLayout_r->insertWidget(1, Button_remove_source);
+    //ui->verticalLayout->insertWidget(3,Button_remove_source);
     Button_remove_source->setVisible(true);
 }
 
 void MainWindow::showRemoveButtonDest(){
-    horizontalLayout_r->insertWidget(1, Button_remove_dest);
+    //ui->verticalLayout_2->insertWidget(3,Button_remove_dest);
     Button_remove_dest->setVisible(true);
 }
 
@@ -342,7 +339,7 @@ void MainWindow::Button_view_backups_pressed(){
             }
         }
         ui->list_dest->setCurrentRow(0);
-        ui->list_source->setCurrentRow(0);
+        //ui->list_source->setCurrentRow(0);
         //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path)); //open json file
         ui->footer->setText("Choose the destination to see the files/folders to backup");
         showRemoveButton();
@@ -402,11 +399,26 @@ void MainWindow::Button_clear_pressed(){
     Button_remove_dest->setVisible(false);
 }
 
+/* OLD (for single selection)
 void MainWindow::remove_from_source(){
     if (ui->list_source->currentItem() != 0 & ui->list_source->count() != 0){
         int current_row = ui->list_source->currentRow();
         QListWidgetItem *selected_item_source = ui->list_source->takeItem(current_row);
         ui->footer->setText(selected_item_source->text()+" removed");
+        if(current_row != 0){
+            ui->list_source->setCurrentRow(current_row-1);
+        }
+        if (ui->list_source->count() == 0){
+            Button_remove_source->setVisible(false);
+        }
+    }
+}*/
+
+void MainWindow::remove_from_source(){
+    if (ui->list_source->currentItem() != 0 & ui->list_source->count() != 0){
+        int current_row = ui->list_source->currentRow();
+        QList <QListWidgetItem *> selected_items = ui->list_source->selectedItems();
+        qDeleteAll(selected_items);
         if(current_row != 0){
             ui->list_source->setCurrentRow(current_row-1);
         }
