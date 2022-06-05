@@ -274,7 +274,7 @@ void MainWindow::Button_start_backup_pressed(){
         bytes = json_doc.toJson(QJsonDocument::Indented);
 
         if(sources_added.isEmpty() && sources_removed.isEmpty()){
-            ui->footer->setText("No changes to save.");
+            ui->footer->showMessage("No changes to save.");
         } else{
             bool confirmation = open_confirmation_box(path_dest_str, sources_added, sources_removed);
             if(confirmation){
@@ -286,16 +286,16 @@ void MainWindow::Button_start_backup_pressed(){
                   if(!ui->list_source->count()){
                       ui->list_dest->takeItem(ui->list_dest->currentRow());
                   }
-                  ui->footer->setText("Backup registered!");
+                  ui->footer->showMessage("Backup registered!");
                   //ui->list_dest->clear();
                   //ui->list_source->clear();
                 } else {
-                  ui->footer->setText("File open failed: " + backups_path);
+                  ui->footer->showMessage("File open failed: " + backups_path);
                 }
             }
         }
     } else {
-        ui->footer->setText("Destination lists cannot be empty!");
+        ui->footer->showMessage("Destination lists cannot be empty!");
     }
 }
 
@@ -341,12 +341,12 @@ void MainWindow::Button_view_backups_pressed(){
         ui->list_dest->setCurrentRow(0);
         //ui->list_source->setCurrentRow(0);
         //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path)); //open json file
-        ui->footer->setText("Choose the destination to see the files/folders to backup");
+        ui->footer->showMessage("Choose the destination to see the files/folders to backup");
         showRemoveButton();
     }
     else{
         file.resize(0); // clear file to avoid crash in case "{}"
-        ui->footer->setText("No bakups registered!");
+        ui->footer->showMessage("No bakups registered!");
     }
 }
 
@@ -366,7 +366,7 @@ void MainWindow::Dest_path_selected(){
             //showRemoveButtonSource();
 
         }
-        //ui->footer->setText(selected_item_dest);
+        //ui->footer->showMessage(selected_item_dest);
     }
 }
 
@@ -394,7 +394,7 @@ bool MainWindow::open_confirmation_box(QString &path_dest, QList<QString> &sourc
 void MainWindow::Button_clear_pressed(){
     ui->list_dest->clear();
     ui->list_source->clear();
-    ui->footer->clear();
+    ui->footer->clearMessage();
     Button_remove_source->setVisible(false);
     Button_remove_dest->setVisible(false);
 }
@@ -404,7 +404,7 @@ void MainWindow::remove_from_source(){
     if (ui->list_source->currentItem() != 0 & ui->list_source->count() != 0){
         int current_row = ui->list_source->currentRow();
         QListWidgetItem *selected_item_source = ui->list_source->takeItem(current_row);
-        ui->footer->setText(selected_item_source->text()+" removed");
+        ui->footer->showMessage(selected_item_source->text()+" removed");
         if(current_row != 0){
             ui->list_source->setCurrentRow(current_row-1);
         }
@@ -431,7 +431,7 @@ void MainWindow::remove_from_source(){
 void MainWindow::remove_from_dest(){
     if(ui->list_dest->count() != 0){
         QListWidgetItem *selected_item_dest = ui->list_dest->takeItem(ui->list_dest->currentRow());
-        ui->footer->setText(selected_item_dest->text()+" removed");
+        ui->footer->showMessage(selected_item_dest->text()+" removed");
         ui->list_dest->setCurrentRow(0);
         if (ui->list_dest->count() == 0){
             Button_remove_dest->setVisible(false);
