@@ -342,6 +342,7 @@ void MainWindow::Button_view_backups_pressed(){
             }
         }
         ui->list_dest->setCurrentRow(0);
+        ui->list_source->setCurrentRow(0);
         //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path)); //open json file
         ui->footer->setText("Choose the destination to see the files/folders to backup");
         showRemoveButton();
@@ -377,7 +378,7 @@ bool MainWindow::open_confirmation_box(QString &path_dest, QList<QString> &sourc
     return false;
   }
   QMessageBox::StandardButton reply;
-  QString message = "Comfirm the changes?\n\n";
+  QString message = "Confirm the changes?\n\n";
   if (!sources_added.isEmpty()) {
     message = message + "Add to backup:\n" + sources_added.join("\n") + "\n\n";
   }
