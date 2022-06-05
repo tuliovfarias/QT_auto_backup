@@ -29,7 +29,7 @@ private:
     void showRemoveButton();
     void showRemoveButtonSource();
     void showRemoveButtonDest();
-    bool open_confirmation_box(QString &path_dest, QList<QString> &new_sources_list);
+    bool open_confirmation_box(QString &path_dest, QList<QString> &sources_added, QList<QString> &sources_removed);
 
 //protected:
     //void dragEnterEvent(QDragEnterEvent *event);

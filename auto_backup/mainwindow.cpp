@@ -223,11 +223,12 @@ QJsonDocument read_json(QFile file){
     return document;
 }
 
-bool search_string_in_json_array(QJsonArray &array, QString str){
-    for (const auto json_str : array){
-      if(json_str == str){
-          return true;
-      }
+template <typename Container>
+bool search_string_in_array(Container const& array, const QString str){
+    foreach(const auto& e, array) {
+        if(e == str){
+            return true;
+        }
     }
     return false;
 }
@@ -243,6 +244,7 @@ void MainWindow::Button_start_backup_pressed(){
     QByteArray bytes = json_doc.toJson(QJsonDocument::Indented);
 
     QList<QString> sources_added;
+    QList<QString> sources_removed;
     QJsonArray new_source_array;
     bool remove_path_dest;
 
@@ -255,10 +257,17 @@ void MainWindow::Button_start_backup_pressed(){
         for (int i = 0; i < ui->list_source->count(); ++i) {
           QString path_source = ui->list_source->item(i)->text();
           new_source_array.push_back(path_source);
-          if(!search_string_in_json_array(source_array, path_source)){
+          if(!search_string_in_array(source_array, path_source)){
             sources_added.append(path_source);
           }
         }
+        foreach(const auto& e, source_array) {
+            QString json_path = e.toString();
+            if(!search_string_in_array(new_source_array, json_path)){
+                sources_removed.append(json_path);
+            }
+        }
+
         if(new_source_array.isEmpty()){
             json_obj.remove(path_dest_str);
         } else{
@@ -267,24 +276,27 @@ void MainWindow::Button_start_backup_pressed(){
         json_doc.setObject(json_obj);
         bytes = json_doc.toJson(QJsonDocument::Indented);
 
-        bool confirmation = open_confirmation_box(path_dest_str, sources_added);
-        if(confirmation){
-            if (file.open(QIODevice::ReadWrite)) {
-              file.resize(0);
-              QTextStream stream(&file);
-              stream << bytes << Qt::endl;
-              file.close();
-              if(!ui->list_source->count()){
-                  ui->list_dest->takeItem(ui->list_dest->currentRow());
-              }
-              ui->footer->setText("Backup registered!");
-              //ui->list_dest->clear();
-              //ui->list_source->clear();
-            } else {
-              ui->footer->setText("File open failed: " + backups_path);
+        if(sources_added.isEmpty() && sources_removed.isEmpty()){
+            ui->footer->setText("No changes to save.");
+        } else{
+            bool confirmation = open_confirmation_box(path_dest_str, sources_added, sources_removed);
+            if(confirmation){
+                if (file.open(QIODevice::ReadWrite)) {
+                  file.resize(0);
+                  QTextStream stream(&file);
+                  stream << bytes << Qt::endl;
+                  file.close();
+                  if(!ui->list_source->count()){
+                      ui->list_dest->takeItem(ui->list_dest->currentRow());
+                  }
+                  ui->footer->setText("Backup registered!");
+                  //ui->list_dest->clear();
+                  //ui->list_source->clear();
+                } else {
+                  ui->footer->setText("File open failed: " + backups_path);
+                }
             }
         }
-
     } else {
         ui->footer->setText("Destination lists cannot be empty!");
     }
@@ -360,15 +372,20 @@ void MainWindow::Dest_path_selected(){
     }
 }
 
-bool MainWindow::open_confirmation_box(QString &path_dest, QList<QString> &new_sources_list){
-  QMessageBox::StandardButton reply;
-  QString message;
-  if(new_sources_list.isEmpty()){
-      message = "Apply changes?";
-  } else{
-      message = "Add to backup:\n" + new_sources_list.join("\n") + "\n\nDestination:\n" + path_dest + "?";
+bool MainWindow::open_confirmation_box(QString &path_dest, QList<QString> &sources_added, QList<QString> &sources_removed){
+  if (sources_added.isEmpty() && sources_removed.isEmpty()) {
+    return false;
   }
-  reply = QMessageBox::question(this, "Confirmation", message, QMessageBox::Yes|QMessageBox::No);
+  QMessageBox::StandardButton reply;
+  QString message = "Comfirm the changes?\n\n";
+  if (!sources_added.isEmpty()) {
+    message = message + "Add to backup:\n" + sources_added.join("\n") + "\n\n";
+  }
+  if (!sources_removed.isEmpty()) {
+    message = message + "Remove from backup:\n" + sources_removed.join("\n") + "\n\n";
+  }
+  message = message + "Destination:\n" + path_dest;
+  reply = QMessageBox::question(this, "Confirmation", message, QMessageBox::Yes | QMessageBox::No);
   if (reply == QMessageBox::Yes) {
     return true;
   } else {
