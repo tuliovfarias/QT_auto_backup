@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
         mainwindow.ui
         dragdropfilter.h
         dragdropfilter.cpp
+        autobackup.h
+        autobackup.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

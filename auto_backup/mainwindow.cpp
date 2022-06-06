@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "dragdropfilter.h"
+#include "autobackup.h"
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
 #include <filesystem>
@@ -14,9 +15,10 @@
 #include <QDragEnterEvent>
 #include <QMessageBox>
 #include <QtAlgorithms>
+#include <QDirIterator>
 
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
-QString backups_path = default_path+QDir::separator()+"backups.json";
+QString backups_json_path = default_path+QDir::separator()+"backups.json";
 QString themes_path = "./themes";
 QString icons_path = "./icons";
 
@@ -203,22 +205,7 @@ void MainWindow::Get_dest_explorer(){
     }
 }
 
-QJsonDocument read_json(QFile file){
-    QJsonDocument document;
-    if (file.open(QIODevice::ReadOnly)) {
-      QByteArray bytes = file.readAll();
-      file.close();
-      if (!bytes.isNull()){
-          QJsonParseError jsonError;
-          document = QJsonDocument::fromJson(bytes, &jsonError);
-          if (jsonError.error != QJsonParseError::NoError) {
-            qDebug() << "Failed while parsing json: " << jsonError.errorString();
-            throw;
-          }
-      }
-    }
-    return document;
-}
+
 
 template <typename Container>
 bool search_string_in_array(Container const& array, const QString str){
@@ -230,19 +217,22 @@ bool search_string_in_array(Container const& array, const QString str){
     return false;
 }
 
+
+
 void MainWindow::Button_start_backup_pressed(){
-    QFile file(backups_path);
+    QFile file(backups_json_path);
     if(!file.exists()){
         file.open(QIODevice::WriteOnly);
         file.close();
     }
-    QJsonDocument json_doc = read_json(backups_path);
+    QJsonDocument json_doc = AutoBackup::read_json(backups_json_path);
     QJsonObject json_obj = json_doc.object();
-    QByteArray bytes = json_doc.toJson(QJsonDocument::Indented);
 
     QList<QString> sources_added;
     QList<QString> sources_removed;
     QJsonArray new_source_array;
+    auto auto_bkp = new AutoBackup(backups_json_path);
+
     bool remove_path_dest;
 
     int items_dest = ui->list_dest->count();
@@ -271,7 +261,7 @@ void MainWindow::Button_start_backup_pressed(){
             json_obj[path_dest_str] = new_source_array;
         }
         json_doc.setObject(json_obj);
-        bytes = json_doc.toJson(QJsonDocument::Indented);
+        QByteArray bytes = json_doc.toJson(QJsonDocument::Indented);
 
         if(sources_added.isEmpty() && sources_removed.isEmpty()){
             ui->footer->showMessage("No changes to save.");
@@ -283,6 +273,7 @@ void MainWindow::Button_start_backup_pressed(){
                   QTextStream stream(&file);
                   stream << bytes << Qt::endl;
                   file.close();
+                  auto_bkp->start_backup();
                   if(!ui->list_source->count()){
                       ui->list_dest->takeItem(ui->list_dest->currentRow());
                   }
@@ -290,7 +281,7 @@ void MainWindow::Button_start_backup_pressed(){
                   //ui->list_dest->clear();
                   //ui->list_source->clear();
                 } else {
-                  ui->footer->showMessage("File open failed: " + backups_path);
+                  ui->footer->showMessage("File open failed: " + backups_json_path);
                 }
             }
         }
@@ -326,8 +317,8 @@ void MainWindow::showRemoveButtonDest(){
 
 void MainWindow::Button_view_backups_pressed(){
     MainWindow::Button_clear_pressed();
-    QFile file(backups_path);
-    QJsonDocument json_doc = read_json(backups_path);
+    QFile file(backups_json_path);
+    QJsonDocument json_doc = AutoBackup::read_json(backups_json_path);
     QJsonObject json_obj = json_doc.object();
     if(!json_obj.isEmpty()){
         foreach(const QString& key, json_obj.keys()) {
@@ -340,7 +331,7 @@ void MainWindow::Button_view_backups_pressed(){
         }
         ui->list_dest->setCurrentRow(0);
         //ui->list_source->setCurrentRow(0);
-        //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_path)); //open json file
+        //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_json_path)); //open json file
         ui->footer->showMessage("Choose the destination to see the files/folders to backup");
         showRemoveButton();
     }
@@ -351,8 +342,8 @@ void MainWindow::Button_view_backups_pressed(){
 }
 
 void MainWindow::Dest_path_selected(){
-    QFile file(backups_path);
-    QJsonDocument json_doc = read_json(backups_path);
+    QFile file(backups_json_path);
+    QJsonDocument json_doc = AutoBackup::read_json(backups_json_path);
     QJsonObject json_obj = json_doc.object();
     if(!json_obj.isEmpty()){
         if(ui->list_dest->count() != 1){
