@@ -257,6 +257,7 @@
      <string>Menu</string>
     </property>
     <addaction name="MenuDarkmode"/>
+    <addaction name="MenuMinimize_to_tray"/>
    </widget>
    <addaction name="menuMenu"/>
   </widget>
@@ -274,6 +275,17 @@
    </property>
    <property name="text">
     <string>Darkmode</string>
+   </property>
+  </action>
+  <action name="MenuMinimize_to_tray">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Minimize to tray</string>
    </property>
   </action>
  </widget>

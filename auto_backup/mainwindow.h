@@ -5,6 +5,7 @@
 #include "qmimedata.h"
 #include "qpushbutton.h"
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -30,6 +31,8 @@ private:
     void showRemoveButtonSource();
     void showRemoveButtonDest();
     bool open_confirmation_box(QString &path_dest, QList<QString> &sources_added, QList<QString> &sources_removed);
+    void create_tray_icon();
+    void changeEvent(QEvent* e);
 
 //protected:
     //void dragEnterEvent(QDragEnterEvent *event);
@@ -47,5 +50,6 @@ private slots:
     void change_DarkMode();
     void remove_from_source();
     void remove_from_dest();
+    void on_show_hide(QSystemTrayIcon::ActivationReason reason);
 };
 #endif // MAINWINDOW_H

@@ -16,6 +16,8 @@
 #include <QMessageBox>
 #include <QtAlgorithms>
 #include <QDirIterator>
+#include <QTimer>
+#include <QSystemTrayIcon>
 
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
 QString backups_json_path = default_path+QDir::separator()+"backups.json";
@@ -37,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     config_icons();
     Button_view_backups_pressed();
     Dest_path_selected();
+    create_tray_icon();
 
     auto dragDropSource = new DragDropFilter;
     auto dragDropDest = new DragDropFilter;
@@ -44,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->list_dest->installEventFilter(dragDropDest);
     ui->list_source->setAcceptDrops(true);
     ui->list_dest->setAcceptDrops(true);
+
+    ui->Button_clear->hide();
 
     connect(dragDropSource, &DragDropFilter::dragDropped, this, [this](const QMimeData* mimeData){add_files_source(mimeData);});
     connect(dragDropDest, &DragDropFilter::dragDropped, this, [this](const QMimeData* mimeData){add_files_dest(mimeData);});
@@ -64,6 +69,59 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::create_tray_icon(){
+  auto m_tray_icon = new QSystemTrayIcon(QIcon("./icons/add_folder.png"), this);
+  connect(m_tray_icon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+          this, SLOT(on_show_hide(QSystemTrayIcon::ActivationReason)));
+
+  QAction *quit_action = new QAction("Exit", m_tray_icon);
+  connect(quit_action, SIGNAL(triggered()), this, SLOT(on_exit()));
+
+  //QAction *hide_action = new QAction("Show/Hide", m_tray_icon);
+  //connect(hide_action, SIGNAL(triggered()), this, SLOT(on_show_hide()));
+
+  QMenu *tray_icon_menu = new QMenu;
+  //tray_icon_menu->addAction(hide_action);
+  tray_icon_menu->addAction(quit_action);
+
+  m_tray_icon->setContextMenu(tray_icon_menu);
+  m_tray_icon->show();
+}
+
+void MainWindow::on_show_hide(QSystemTrayIcon::ActivationReason reason) {
+  if (reason) {
+    if (reason != QSystemTrayIcon::DoubleClick)
+      return;
+  }
+  if (isVisible()) {
+    //hide();
+  } else {
+    show();
+    raise();
+    setFocus();
+    this->setWindowState(this->windowState() & ~Qt::WindowMinimized | Qt::WindowActive);
+  }
+}
+
+void MainWindow::changeEvent(QEvent* e) {
+  switch (e->type()) {
+      case QEvent::LanguageChange:
+        this->ui->retranslateUi(this);
+        break;
+      case QEvent::WindowStateChange: {
+        if (this->windowState() & Qt::WindowMinimized) {
+          if (ui->MenuMinimize_to_tray->isChecked()){
+            QTimer::singleShot(0, this, SLOT(hide()));
+          }
+        }
+        break;
+      }
+      default:
+        break;
+  }
+  QMainWindow::changeEvent(e);
 }
 
 void MainWindow::config_remove_buttom(){

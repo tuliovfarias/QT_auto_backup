@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 {
 
     QApplication a(argc, argv);
+    a.setWindowIcon(QIcon("./icons/add_folder.png"));
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();

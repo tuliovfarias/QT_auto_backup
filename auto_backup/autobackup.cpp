@@ -75,3 +75,12 @@ void AutoBackup::start_backup() {
         }
     }
 }
+
+/*
+int main(int argc, char *argv[]){
+    QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
+    QString backups_json_path = default_path+QDir::separator()+"backups.json";
+    auto auto_bkp = new AutoBackup("");
+    auto_bkp->start_backup();
+    return 0;
+}*/
