@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "autobackup.h"
 
 #include <QApplication>
 #include <QLocale>

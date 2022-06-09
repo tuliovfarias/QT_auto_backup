@@ -23,6 +23,7 @@ QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
 QString backups_json_path = default_path+QDir::separator()+"backups.json";
 QString themes_path = "./themes";
 QString icons_path = "./icons";
+auto auto_bkp = new AutoBackup(backups_json_path);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -34,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     if (!QDir(default_path).exists())
         QDir(default_path).mkpath(".");
+
 
     config_remove_buttom();
     config_icons();
@@ -50,6 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->Button_clear->hide();
 
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(TimerSlot()));
+    timer->start(1000*2);
+
     connect(dragDropSource, &DragDropFilter::dragDropped, this, [this](const QMimeData* mimeData){add_files_source(mimeData);});
     connect(dragDropDest, &DragDropFilter::dragDropped, this, [this](const QMimeData* mimeData){add_files_dest(mimeData);});
 
@@ -61,14 +67,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->Button_clear, SIGNAL(released()), this, SLOT(Button_clear_pressed()));
     connect(ui->list_dest, SIGNAL(itemSelectionChanged()), this, SLOT(Dest_path_selected()));
     connect(ui->MenuDarkmode, SIGNAL(triggered()), this, SLOT(change_DarkMode()));
+    connect(ui->MenuActiveAutoBackup, SIGNAL(triggered()), this, SLOT(change_active_auto_backup()));
 
     connect(Button_remove_source, SIGNAL(released()), this, SLOT(remove_from_source()));
     connect(Button_remove_dest, SIGNAL(released()), this, SLOT(remove_from_dest()));
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
+MainWindow::~MainWindow(){}
+
+void MainWindow::TimerSlot(){
+    qDebug() << "timer";
+    auto_bkp->start_backup();
 }
 
 void MainWindow::create_tray_icon(){
@@ -88,6 +97,15 @@ void MainWindow::create_tray_icon(){
 
   m_tray_icon->setContextMenu(tray_icon_menu);
   m_tray_icon->show();
+}
+
+void MainWindow::change_active_auto_backup(){
+    if(ui->MenuActiveAutoBackup->isChecked()){
+        timer->start(1000*2);
+    }
+    else{
+        timer->stop();
+    }
 }
 
 void MainWindow::on_show_hide(QSystemTrayIcon::ActivationReason reason) {
@@ -231,7 +249,7 @@ void MainWindow::Get_source_explorer(){
     QString buttonText = button->text();
     if(button->objectName() == "Button_source_folder"){
       QString source_folder = QFileDialog::getExistingDirectory(
-          this, tr("Open Directory"), "/home",
+          this, tr("Abrir diretório"), "/home",
           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
       if(!source_folder.isEmpty()){
         ui->list_source->addItem(source_folder);
@@ -240,7 +258,7 @@ void MainWindow::Get_source_explorer(){
     }
     else if(button->objectName() == "Button_source_files"){
       QStringList source_files = QFileDialog::getOpenFileNames(
-          this, tr("Select files/folders to backup"), "/home", tr("Any(*.*)"));
+          this, tr("Selecione arquivos/pastas para backup"), "/home", tr("Any(*.*)"));
       if(!source_files.isEmpty()){
           for (const auto &file : source_files) {
             ui->list_source->addItem(file);
@@ -255,15 +273,13 @@ void MainWindow::Get_source_explorer(){
 
 void MainWindow::Get_dest_explorer(){
     QString dest_folder = QFileDialog::getExistingDirectory(
-        this, tr("Open Directory"), "/home",
+        this, tr("Abrir diretório"), "/home",
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if(!dest_folder.isEmpty()){
         ui->list_dest->addItem(dest_folder);
         showRemoveButtonDest();
     }
 }
-
-
 
 template <typename Container>
 bool search_string_in_array(Container const& array, const QString str){
@@ -274,8 +290,6 @@ bool search_string_in_array(Container const& array, const QString str){
     }
     return false;
 }
-
-
 
 void MainWindow::Button_start_backup_pressed(){
     QFile file(backups_json_path);
@@ -289,13 +303,14 @@ void MainWindow::Button_start_backup_pressed(){
     QList<QString> sources_added;
     QList<QString> sources_removed;
     QJsonArray new_source_array;
-    auto auto_bkp = new AutoBackup(backups_json_path);
 
     bool remove_path_dest;
 
+    int items_source = ui->list_source->count();
     int items_dest = ui->list_dest->count();
+
     if (items_dest) {
-        if(items_dest == 1){ui->list_dest->setCurrentRow(0);} // select the unique destination path
+        if(items_dest == 1){ui->list_dest->setCurrentRow(0);} // select the unique Destino path
         QListWidgetItem *path_dest = ui->list_dest->currentItem();
         QString path_dest_str = path_dest->text();
         QJsonArray source_array = json_obj.value(path_dest_str).toArray();
@@ -307,9 +322,9 @@ void MainWindow::Button_start_backup_pressed(){
           }
         }
         foreach(const auto& e, source_array) {
-            QString json_path = e.toString();
-            if(!search_string_in_array(new_source_array, json_path)){
-                sources_removed.append(json_path);
+            QString source_path_json = e.toString();
+            if(!search_string_in_array(new_source_array, source_path_json)){
+                sources_removed.append(source_path_json);
             }
         }
 
@@ -322,10 +337,10 @@ void MainWindow::Button_start_backup_pressed(){
         QByteArray bytes = json_doc.toJson(QJsonDocument::Indented);
 
         if(sources_added.isEmpty() && sources_removed.isEmpty()){
-            ui->footer->showMessage("No changes to save.");
+            ui->footer->showMessage("Nenhuma modificação feita.");
         } else{
-            bool confirmation = open_confirmation_box(path_dest_str, sources_added, sources_removed);
-            if(confirmation){
+            bool Confirmação = open_confirmation_box(path_dest_str, sources_added, sources_removed);
+            if(Confirmação){
                 if (file.open(QIODevice::ReadWrite)) {
                   file.resize(0);
                   QTextStream stream(&file);
@@ -335,17 +350,20 @@ void MainWindow::Button_start_backup_pressed(){
                   if(!ui->list_source->count()){
                       ui->list_dest->takeItem(ui->list_dest->currentRow());
                   }
-                  ui->footer->showMessage("Backup registered!");
+                  ui->footer->showMessage("Backup registrado!");
                   //ui->list_dest->clear();
                   //ui->list_source->clear();
                 } else {
-                  ui->footer->showMessage("File open failed: " + backups_json_path);
+                  ui->footer->showMessage("Falhou ao abrir o arquivo: " + backups_json_path);
                 }
             }
         }
+    } else if(!items_source){
+        QFile::remove(backups_json_path);
     } else {
-        ui->footer->showMessage("Destination lists cannot be empty!");
+        ui->footer->showMessage("Lista de destino não pode estar vazia!");
     }
+    Button_view_backups_pressed();
 }
 
 template <typename Container>
@@ -381,7 +399,7 @@ void MainWindow::Button_view_backups_pressed(){
     if(!json_obj.isEmpty()){
         foreach(const QString& key, json_obj.keys()) {
             QJsonValue values = json_obj.value(key);
-            qDebug() << "Destination: " << key << " => To backup: " << join_as_string(values.toArray());
+            qDebug() << "Destino: " << key << " => para backup: " << join_as_string(values.toArray());
             ui->list_dest->addItem(key);
             for (int i = 0; i < values.toArray().count(); ++i){
                 ui->list_source->addItem(values[i].toString());
@@ -390,7 +408,7 @@ void MainWindow::Button_view_backups_pressed(){
         ui->list_dest->setCurrentRow(0);
         //ui->list_source->setCurrentRow(0);
         //QDesktopServices::openUrl(QUrl::fromLocalFile(backups_json_path)); //open json file
-        ui->footer->showMessage("Choose the destination to see the files/folders to backup");
+        ui->footer->showMessage("Clique em uma pasta destino para ver os arquivos para backup");
         showRemoveButton();
     }
     else{
@@ -424,15 +442,15 @@ bool MainWindow::open_confirmation_box(QString &path_dest, QList<QString> &sourc
     return false;
   }
   QMessageBox::StandardButton reply;
-  QString message = "Confirm the changes?\n\n";
+  QString message = "Confirmar mudanças?\n\n";
   if (!sources_added.isEmpty()) {
-    message = message + "Add to backup:\n" + sources_added.join("\n") + "\n\n";
+    message = message + "Adicionar para backup:\n" + sources_added.join("\n") + "\n\n";
   }
   if (!sources_removed.isEmpty()) {
-    message = message + "Remove from backup:\n" + sources_removed.join("\n") + "\n\n";
+    message = message + "Descadastrar backup para:\n" + sources_removed.join("\n") + "\n\n";
   }
-  message = message + "Destination:\n" + path_dest;
-  reply = QMessageBox::question(this, "Confirmation", message, QMessageBox::Yes | QMessageBox::No);
+  message = message + "Destino:\n" + path_dest;
+  reply = QMessageBox::question(this, "Confirmação", message, QMessageBox::Yes | QMessageBox::No);
   if (reply == QMessageBox::Yes) {
     return true;
   } else {
@@ -480,7 +498,7 @@ void MainWindow::remove_from_source(){
 void MainWindow::remove_from_dest(){
     if(ui->list_dest->count() != 0){
         QListWidgetItem *selected_item_dest = ui->list_dest->takeItem(ui->list_dest->currentRow());
-        ui->footer->showMessage(selected_item_dest->text()+" removed");
+        ui->footer->showMessage(selected_item_dest->text()+" removido do destino");
         ui->list_dest->setCurrentRow(0);
         if (ui->list_dest->count() == 0){
             Button_remove_dest->setVisible(false);

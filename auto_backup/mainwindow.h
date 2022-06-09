@@ -19,6 +19,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void set_DarkMode(bool on);
+    QTimer *timer;
 
 private:
     Ui::MainWindow *ui;
@@ -51,5 +52,7 @@ private slots:
     void remove_from_source();
     void remove_from_dest();
     void on_show_hide(QSystemTrayIcon::ActivationReason reason);
+    void TimerSlot();
+    void change_active_auto_backup();
 };
 #endif // MAINWINDOW_H

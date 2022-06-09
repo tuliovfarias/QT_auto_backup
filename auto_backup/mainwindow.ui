@@ -54,7 +54,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>File(s)/folder(s) to backup</string>
+             <string>Arquivos/pastas para backup</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -141,7 +141,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Destination folder(s)</string>
+             <string>Pastas de destino</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -207,7 +207,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Save</string>
+           <string>Salvar</string>
           </property>
          </widget>
         </item>
@@ -220,7 +220,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>View active backups</string>
+           <string>Ver backups salvos</string>
           </property>
          </widget>
         </item>
@@ -233,7 +233,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Clear lists</string>
+           <string>Limpar listas</string>
           </property>
          </widget>
         </item>
@@ -256,6 +256,7 @@
     <property name="title">
      <string>Menu</string>
     </property>
+    <addaction name="MenuActiveAutoBackup"/>
     <addaction name="MenuDarkmode"/>
     <addaction name="MenuMinimize_to_tray"/>
    </widget>
@@ -285,7 +286,18 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Minimize to tray</string>
+    <string>Minimizar para a bandeja</string>
+   </property>
+  </action>
+  <action name="MenuActiveAutoBackup">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Ativar backup automático</string>
    </property>
   </action>
  </widget>

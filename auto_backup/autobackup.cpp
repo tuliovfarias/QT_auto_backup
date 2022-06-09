@@ -59,11 +59,29 @@ void AutoBackup::start_backup() {
         QJsonArray values = json_obj.value(dest_dir).toArray();
         foreach(const auto& value, values){
             QString source_path = value.toString();
-            QFileInfo fi(source_path);
-            if(fi.exists()){
-                if(fi.isFile()){
-                    copy_file(source_path, dest_dir);
+            QFileInfo file_source(source_path);
+            if(file_source.exists()){
+                if(file_source.isFile()){
+                    QFileInfo file_dest(dest_dir+QDir::separator()+file_source.fileName());
+                    if (file_dest.exists())
+                    {
+                        if (file_dest.lastModified() < file_source.lastModified()){
+                            qDebug() << "Updated: " << source_path << " -> " << dest_dir;
+                            QFile::remove(dest_dir);
+                            copy_file(source_path, dest_dir);
+                        } else{
+                            qDebug() << source_path << " = " << dest_dir;
+                            continue;
+                        }
+                    } else{
+                        if(QFile::exists(dest_dir)){
+                            copy_file(source_path, dest_dir);
+                        } else{
+                            qDebug() << "Destination does not exists: " << dest_dir;
+                        }
+                    }
                 } else{
+                    qDebug() << "Created: " << source_path << " -> " << dest_dir;
                     copy_dir(source_path, dest_dir);
                     /*
                     //QDirIterator it(source_path, QStringList() << "*.jpg", QDir::Files, QDirIterator::Subdirectories);
@@ -71,7 +89,10 @@ void AutoBackup::start_backup() {
                     while (it.hasNext())
                         qDebug() << it.next();*/
                 }
+            } else{
+                qDebug() << "Source does not exists: " << source_path;
             }
+
         }
     }
 }
