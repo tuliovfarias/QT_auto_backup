@@ -19,6 +19,11 @@
 #include <QTimer>
 #include <QSystemTrayIcon>
 
+#include <thread>
+#include <iostream>
+#include <vector>
+#include <QThreadPool>
+
 QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
 QString backups_json_path = default_path+QDir::separator()+"backups.json";
 QString themes_path = "./themes";
@@ -75,9 +80,15 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow(){}
 
+void start_bck(){
+    auto_bkp->start_backup();
+}
+
 void MainWindow::TimerSlot(){
     qDebug() << "timer";
-    auto_bkp->start_backup();
+    QThreadPool::globalInstance()->start(start_bck);
+    //std::thread t1(auto_bkp->start_backup());
+    //t1.join();
 }
 
 void MainWindow::create_tray_icon(){
@@ -413,7 +424,7 @@ void MainWindow::Button_view_backups_pressed(){
     }
     else{
         file.resize(0); // clear file to avoid crash in case "{}"
-        ui->footer->showMessage("No bakups registered!");
+        ui->footer->showMessage("Nenhum backup registrado.");
     }
 }
 
