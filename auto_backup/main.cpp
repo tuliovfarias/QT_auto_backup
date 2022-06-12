@@ -5,6 +5,7 @@
 #include <QLocale>
 #include <QTranslator>
 #include <QFile>
+#include <QThreadPool>
 
 int main(int argc, char *argv[])
 {

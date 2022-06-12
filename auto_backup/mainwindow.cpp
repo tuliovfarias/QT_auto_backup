@@ -18,17 +18,16 @@
 #include <QDirIterator>
 #include <QTimer>
 #include <QSystemTrayIcon>
-
-#include <thread>
-#include <iostream>
-#include <vector>
 #include <QThreadPool>
+#include <QCloseEvent>
 
-QString default_path = QDir::homePath()+ QDir::separator() + "auto-backup";
-QString backups_json_path = default_path+QDir::separator()+"backups.json";
+QString default_path = QDir::homePath() + QDir::separator() + "auto-backup";
+QString backups_json_path = default_path + QDir::separator() + "backups.json";
 QString themes_path = "./themes";
 QString icons_path = "./icons";
-auto auto_bkp = new AutoBackup(backups_json_path);
+AutoBackup *auto_bkp = new AutoBackup(backups_json_path);
+QThreadPool *threadPool = new QThreadPool();
+QSystemTrayIcon *m_tray_icon;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -38,9 +37,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->list_source->setSelectionMode(QListView::ExtendedSelection);
 
+    //threadPool->setMaxThreadCount(1);
+    auto_bkp->setAutoDelete(false);
+
     if (!QDir(default_path).exists())
         QDir(default_path).mkpath(".");
-
 
     config_remove_buttom();
     config_icons();
@@ -48,8 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     Dest_path_selected();
     create_tray_icon();
 
-    auto dragDropSource = new DragDropFilter;
-    auto dragDropDest = new DragDropFilter;
+    auto *dragDropSource = new DragDropFilter;
+    auto *dragDropDest = new DragDropFilter;
     ui->list_source->installEventFilter(dragDropSource);
     ui->list_dest->installEventFilter(dragDropDest);
     ui->list_source->setAcceptDrops(true);
@@ -78,21 +79,40 @@ MainWindow::MainWindow(QWidget *parent)
     connect(Button_remove_dest, SIGNAL(released()), this, SLOT(remove_from_dest()));
 }
 
-MainWindow::~MainWindow(){}
+MainWindow::~MainWindow(){
+    //delete threadPool;
+    m_tray_icon->hide();
+    delete auto_bkp;
+}
 
-void start_bck(){
-    auto_bkp->start_backup();
+void MainWindow::closeEvent(QCloseEvent *event){
+  QMessageBox::StandardButton resBtn = QMessageBox::question(
+      this, "Confirmação", tr("Tem certeza que quer sair do auto-backup?\n"),
+      QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
+  if (resBtn != QMessageBox::Yes) {
+    event->ignore();
+  } else {
+    event->accept();
+    threadPool->clear();
+    //threadPool->waitForDone();
+    delete auto_bkp;
+  }
+}
+
+void start_backup(){
+    threadPool->start(auto_bkp);
+    qDebug() << "threadPool:" << threadPool->activeThreadCount() << threadPool->maxThreadCount();
 }
 
 void MainWindow::TimerSlot(){
     qDebug() << "timer";
-    QThreadPool::globalInstance()->start(start_bck);
+    start_backup();
     //std::thread t1(auto_bkp->start_backup());
     //t1.join();
 }
 
 void MainWindow::create_tray_icon(){
-  auto m_tray_icon = new QSystemTrayIcon(QIcon("./icons/add_folder.png"), this);
+  m_tray_icon = new QSystemTrayIcon(QIcon("./icons/add_folder.png"), this);
   connect(m_tray_icon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
           this, SLOT(on_show_hide(QSystemTrayIcon::ActivationReason)));
 
@@ -357,7 +377,7 @@ void MainWindow::Button_start_backup_pressed(){
                   QTextStream stream(&file);
                   stream << bytes << Qt::endl;
                   file.close();
-                  auto_bkp->start_backup();
+                  start_backup();
                   if(!ui->list_source->count()){
                       ui->list_dest->takeItem(ui->list_dest->currentRow());
                   }

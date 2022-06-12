@@ -34,6 +34,7 @@ private:
     bool open_confirmation_box(QString &path_dest, QList<QString> &sources_added, QList<QString> &sources_removed);
     void create_tray_icon();
     void changeEvent(QEvent* e);
+    void closeEvent (QCloseEvent *event);
 
 //protected:
     //void dragEnterEvent(QDragEnterEvent *event);
