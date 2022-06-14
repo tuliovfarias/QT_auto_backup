@@ -1,12 +1,29 @@
 # QT_auto_backup
 Backup automático de arquivos (C++ e Qt)
 
-Funcionalidades:
+## Funcionalidades:
 
-- Backup automático em segundo plano
+- Backup automático em segundo plano (inicialização automática)
 - Visualizar e gerenciar backups (remover ou adicionar aquivos/pastas)
 - Adicionar arquivos/pastas arrastando e soltando ou selecionando pelo explorer
 - Temas disponíveis: Light ou Dark
 - Permite minimizar para bandeja do sistema
+
+## Instalação:
+1. Executar \Instalador\auto_backup_instalador.exe
+2. Marcar para criar atalho na Área de Trabalho (recomendado)
+3. Senha de instalação na descrição do vídeo:
+
+https://www.youtube.com/channel/UCMSJvDTIbeZePQTjl-wQcvQ
+
+## Uso:
+- Executar Auto-Backup na área de trabalho ou no local selecionado na instalação
+- Selecionar ou arrastar pasta/arquivos de origem (para backup)
+- Selecionar ou arrastar pasta de destino
+- Salvar e confirmar
+- O backup será feito automaticamente enquanto o programa estiver aberto (pode estar minimizado na bandeja)
+- Qualquer modificação feita na origem, será refletida no destino
+- Caso a origem seja uma pasta, todos os arquivos atualizados ou criados dentro dela, serão sincronizados no destino.
+
 
 ![image](https://user-images.githubusercontent.com/39657511/172063689-069cb9f2-2e1c-47d8-90c4-56b97657c79b.png)
