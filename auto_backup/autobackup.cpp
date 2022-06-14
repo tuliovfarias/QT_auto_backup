@@ -109,9 +109,11 @@ void AutoBackup::chk_mtime_and_copy_file(QString source_path, QString dest_dir){
             return;
         }
     } else{
-        if(QDir(dest_dir).exists()){
+        QDir dir(dest_dir);
+        if(dir.exists()){
             copy_file(source_path, dest_dir);
         } else{
+            dir.mkpath(dest_dir);
             qDebug() << "Destination dir does not exists: " << dest_dir;
         }
     }
