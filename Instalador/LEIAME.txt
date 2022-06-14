@@ -1,0 +1,8 @@
+Desenvolvido em C++ utilizando QT.
+Por Tulio Farias.
+
+Projeto completo no link e senha para instalar:
+https://github.com/tuliovfarias/QT_auto_backup
+
+Mais projetos de eletronica e programacao em:
+https://www.youtube.com/channel/UCMSJvDTIbeZePQTjl-wQcvQ
