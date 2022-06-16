@@ -15,7 +15,7 @@ Backup automático de arquivos (C++ e Qt)
 1. Executar \Instalador\auto_backup_instalador.exe
 2. Marcar para criar atalho na Área de Trabalho (recomendado)
 3. Senha de instalação na descrição do vídeo:
-https://www.youtube.com/channel/UCMSJvDTIbeZePQTjl-wQcvQ
+https://www.youtube.com/watch?v=WM8_ph92Tt0
 
 ## Uso:
 - Executar Auto-Backup na área de trabalho ou no local selecionado na instalação
