@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->list_dest, SIGNAL(itemSelectionChanged()), this, SLOT(Dest_path_selected()));
     connect(ui->MenuDarkmode, SIGNAL(triggered()), this, SLOT(change_DarkMode()));
     connect(ui->MenuActiveAutoBackup, SIGNAL(triggered()), this, SLOT(change_active_auto_backup()));
+    connect(ui->MenuAuto_Backup, SIGNAL(triggered()), this, SLOT(show_about_window()));
 
     connect(Button_remove_source, SIGNAL(released()), this, SLOT(remove_from_source()));
     connect(Button_remove_dest, SIGNAL(released()), this, SLOT(remove_from_dest()));
@@ -98,6 +99,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
     delete auto_bkp;
   }
 }
+
 
 void start_backup(){
     threadPool->start(auto_bkp);
@@ -171,6 +173,22 @@ void MainWindow::changeEvent(QEvent* e) {
         break;
   }
   QMainWindow::changeEvent(e);
+}
+
+void MainWindow::show_about_window(){
+    QString text=
+            "Por Túlio Farias<br><br>"
+            "Projeto completo em:<br>"
+            "<a href=\"https://github.com/tuliovfarias/QT_auto_backup\">https://github.com/tuliovfarias/QT_auto_backup</a><br><br>"
+            "YouTube:<br>"
+            "<a href=\"https://www.youtube.com/user/tuliovfarias\">https://www.youtube.com/user/tuliovfarias</a>";
+
+    QMessageBox aboutBox(QMessageBox::NoIcon,
+                        "Sobre Auto-Backup",
+                        "");
+    aboutBox.setTextFormat(Qt::RichText);
+    aboutBox.setText(text);
+    aboutBox.exec();
 }
 
 void MainWindow::config_remove_buttom(){

@@ -260,7 +260,14 @@
     <addaction name="MenuDarkmode"/>
     <addaction name="MenuMinimize_to_tray"/>
    </widget>
+   <widget class="QMenu" name="menuSobre">
+    <property name="title">
+     <string>Sobre</string>
+    </property>
+    <addaction name="MenuAuto_Backup"/>
+   </widget>
    <addaction name="menuMenu"/>
+   <addaction name="menuSobre"/>
   </widget>
   <widget class="QStatusBar" name="footer">
    <property name="layoutDirection">
@@ -298,6 +305,11 @@
    </property>
    <property name="text">
     <string>Ativar backup automático</string>
+   </property>
+  </action>
+  <action name="MenuAuto_Backup">
+   <property name="text">
+    <string>Auto-Backup</string>
    </property>
   </action>
  </widget>

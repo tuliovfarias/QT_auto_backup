@@ -55,5 +55,6 @@ private slots:
     void on_show_hide(QSystemTrayIcon::ActivationReason reason);
     void TimerSlot();
     void change_active_auto_backup();
+    void show_about_window();
 };
 #endif // MAINWINDOW_H
